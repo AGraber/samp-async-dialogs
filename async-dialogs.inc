@@ -1,3 +1,12 @@
+#if defined _inc_async_dialogs
+	#undef _inc_async_dialogs
+#endif 
+
+#if defined async_dialogs_included
+	#endinput
+#endif
+#define async_dialogs_included
+
 #include <PawnPlus>
 
 enum e_DIALOG_RESPONSE_INFO
