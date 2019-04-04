@@ -20,13 +20,28 @@ const PAWN_PLUS_DIALOG_ID = 0x502B; // "P+" in ascii hex
 
 static Task:PlayerDialogTasks[MAX_PLAYERS] = {Task:0, ...};
 
+static CallbackHandler:OnDialogResponse;
+static NativeHook:ShowPlayerDialog;
+
 public OnGameModeInit()
 {
-	pawn_register_callback("OnDialogResponse", "AsyncDialogsHandler");
-	pawn_add_filter("ShowPlayerDialog", "dddssss", "AsyncDialogsShowHook", filter_out);
+	OnDialogResponse = pawn_register_callback("OnDialogResponse", "AsyncDialogsHandler");
+	ShowPlayerDialog = pawn_add_filter("ShowPlayerDialog", "dddssss", "AsyncDialogsShowHook", filter_out);
 
 	#if defined AsyncDialogs_OnGameModeInit
 		return AsyncDialogs_OnGameModeInit();
+	#else
+		return 1;
+	#endif
+}
+
+public OnGameModeExit()
+{
+	pawn_unregister_callback(OnDialogResponse);
+	pawn_remove_hook(ShowPlayerDialog);
+
+	#if defined AsyncDialogs_OnGameModeExit
+		return AsyncDialogs_OnGameModeExit();
 	#else
 		return 1;
 	#endif
@@ -78,4 +93,15 @@ public AsyncDialogsShowHook(&playerid, &dialogid, &style, const caption[], const
 #define OnGameModeInit AsyncDialogs_OnGameModeInit
 #if defined AsyncDialogs_OnGameModeInit
     forward AsyncDialogs_OnGameModeInit();
+#endif
+
+#if defined _ALS_OnGameModeExit
+	#undef OnGameModeExit
+#else
+	#define _ALS_OnGameModeExit
+#endif
+
+#define OnGameModeExit AsyncDialogs_OnGameModeExit
+#if defined AsyncDialogs_OnGameModeExit
+	forward AsyncDialogs_OnGameModeExit();
 #endif
