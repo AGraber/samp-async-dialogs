@@ -21,12 +21,10 @@ const PAWN_PLUS_DIALOG_ID = 0x502B; // "P+" in ascii hex
 static Task:PlayerDialogTasks[MAX_PLAYERS] = {Task:0, ...};
 
 static CallbackHandler:OnDialogResponse;
-static NativeHook:ShowPlayerDialog;
 
 public OnGameModeInit()
 {
 	OnDialogResponse = pawn_register_callback("OnDialogResponse", "AsyncDialogsHandler");
-	ShowPlayerDialog = pawn_add_filter("ShowPlayerDialog", "dddssss", "AsyncDialogsShowHook", filter_out);
 
 	#if defined AsyncDialogs_OnGameModeInit
 		return AsyncDialogs_OnGameModeInit();
@@ -50,6 +48,10 @@ public OnGameModeExit()
 AwaitAsyncDialog(playerid, dialog_response[e_DIALOG_RESPONSE_INFO], style, const caption[], const info[], const button1[], const button2[])
 {
 	ShowPlayerDialog(playerid, PAWN_PLUS_DIALOG_ID, style, caption, info, button1, button2);
+	if(PlayerDialogTasks[playerid])
+	{
+		task_delete(PlayerDialogTasks[playerid]);
+	}
 	new const Task:dialog_task = PlayerDialogTasks[playerid] = task_new();
 	task_await(dialog_task);
 
@@ -73,16 +75,6 @@ public AsyncDialogsHandler(playerid, dialogid, response, listitem, const inputte
 		return 1;
 	}
 	return 0;
-}
-
-forward AsyncDialogsShowHook(&playerid, &dialogid, &style, const caption[], const info[], const button1[], const button2[]);
-public AsyncDialogsShowHook(&playerid, &dialogid, &style, const caption[], const info[], const button1[], const button2[])
-{
-	if(PlayerDialogTasks[playerid])
-	{
-		task_delete(PlayerDialogTasks[playerid]);
-		PlayerDialogTasks[playerid] = Task:0;
-	}
 }
 
 #if defined _ALS_OnGameModeInit
