@@ -36,7 +36,6 @@ public OnGameModeInit()
 public OnGameModeExit()
 {
 	pawn_unregister_callback(OnDialogResponse);
-	pawn_remove_hook(ShowPlayerDialog);
 
 	#if defined AsyncDialogs_OnGameModeExit
 		return AsyncDialogs_OnGameModeExit();
