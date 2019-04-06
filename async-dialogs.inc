@@ -20,11 +20,11 @@ const PAWN_PLUS_DIALOG_ID = 0x502B; // "P+" in ascii hex
 
 static Task:PlayerDialogTasks[MAX_PLAYERS] = {Task:0, ...};
 
-static CallbackHandler:OnDialogResponse;
+static CallbackHandler:AsyncDialogResponseHandler;
 
 public OnGameModeInit()
 {
-	OnDialogResponse = pawn_register_callback("OnDialogResponse", "AsyncDialogsHandler");
+	AsyncDialogResponseHandler = pawn_register_callback("OnDialogResponse", "AsyncDialogsHandler");
 
 	#if defined AsyncDialogs_OnGameModeInit
 		return AsyncDialogs_OnGameModeInit();
@@ -35,7 +35,7 @@ public OnGameModeInit()
 
 public OnGameModeExit()
 {
-	pawn_unregister_callback(OnDialogResponse);
+	pawn_unregister_callback(AsyncDialogResponseHandler);
 
 	#if defined AsyncDialogs_OnGameModeExit
 		return AsyncDialogs_OnGameModeExit();
