@@ -44,9 +44,22 @@ public OnGameModeExit()
 	#endif
 }
 
-AwaitAsyncDialog(playerid, dialog_response[e_DIALOG_RESPONSE_INFO], style, const caption[], const info[], const button1[], const button2[])
+stock AwaitAsyncDialog(playerid, dialog_response[e_DIALOG_RESPONSE_INFO], style, const caption[], const info[], const button1[], const button2[])
 {
 	ShowPlayerDialog(playerid, PAWN_PLUS_DIALOG_ID, style, caption, info, button1, button2);
+	if(PlayerDialogTasks[playerid])
+	{
+		task_delete(PlayerDialogTasks[playerid]);
+	}
+	new const Task:dialog_task = PlayerDialogTasks[playerid] = task_new();
+	task_await(dialog_task);
+
+	task_get_result_arr(dialog_task, dialog_response);
+}
+
+stock AwaitAsyncDialogStr(playerid, dialog_response[e_DIALOG_RESPONSE_INFO], style, ConstStringTag:caption, ConstStringTag:info, ConstStringTag:button1, ConstStringTag:button2)
+{
+	pawn_call_native("ShowPlayerDialog", "dddSSSS", playerid, PAWN_PLUS_DIALOG_ID, style, _:caption, _:info, _:button1, _:button2);
 	if(PlayerDialogTasks[playerid])
 	{
 		task_delete(PlayerDialogTasks[playerid]);
