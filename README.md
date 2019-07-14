@@ -49,14 +49,14 @@ CMD:asyncdialog(playerid, params[])
 	task_yield(1);
 
 	new dialog_response[e_DIALOG_RESPONSE_INFO];
-	AwaitAsyncDialog(playerid, dialog_response, DIALOG_STYLE_LIST, "Example dialog", "This is listitem 0\nAnd this is one\nShow example nested dialog", "ok", "no");
+	await_arr(dialog_response) ShowPlayerAsyncDialog(playerid, DIALOG_STYLE_LIST, "Example dialog", "This is listitem 0\nAnd this is one\nShow example nested dialog", "ok", "no");
 
 	if(dialog_response[E_DIALOG_RESPONSE_Response])
 	{
 		if(dialog_response[E_DIALOG_RESPONSE_Listitem] == 2)
 		{
 			new other_dialog_response[e_DIALOG_RESPONSE_INFO];
-			AwaitAsyncDialog(playerid, other_dialog_response, DIALOG_STYLE_MSGBOX, "Example nested dialog", "You will recieve a message\nwhichever your response is", "OK", "Yes");
+			await_arr(other_dialog_response) ShowPlayerAsyncDialog(playerid, DIALOG_STYLE_MSGBOX, "Example nested dialog", "You will recieve a message\nwhichever your response is", "OK", "Yes");
 
 			SendClientMessage(playerid, COLOR_WHITE, "You responded something to the example dialog");
 		}
