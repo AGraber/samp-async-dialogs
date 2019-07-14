@@ -9,14 +9,20 @@
 
 #include <PawnPlus>
 
+#if !defined PAWN_PLUS_DIALOG_ID
+	const PAWN_PLUS_DIALOG_ID = 0x502B; // "P+" in ascii hex
+#endif
+
+#if defined PPDIALOGS_NO_COMPAT_NATIVE_CALL
+	native ShowPlayerDialogStr(playerid, dialogid, style, ConstAmxString:caption, ConstAmxString:info, ConstAmxString:button1, ConstAmxString:button2) = ShowPlayerDialog;
+#endif
+
 enum e_DIALOG_RESPONSE_INFO
 {
 	E_DIALOG_RESPONSE_Response,
 	E_DIALOG_RESPONSE_Listitem,
 	E_DIALOG_RESPONSE_InputText[128 + 1],
 }
-
-const PAWN_PLUS_DIALOG_ID = 0x502B; // "P+" in ascii hex
 
 static Task:PlayerDialogTasks[MAX_PLAYERS] = {Task:0, ...};
 
@@ -44,6 +50,7 @@ public OnGameModeExit()
 	#endif
 }
 
+#pragma deprecated Use ShowPlayerAsyncDialog instead
 stock AwaitAsyncDialog(playerid, dialog_response[e_DIALOG_RESPONSE_INFO], style, const caption[], const info[], const button1[], const button2[])
 {
 	ShowPlayerDialog(playerid, PAWN_PLUS_DIALOG_ID, style, caption, info, button1, button2);
@@ -57,9 +64,15 @@ stock AwaitAsyncDialog(playerid, dialog_response[e_DIALOG_RESPONSE_INFO], style,
 	task_get_result_arr(dialog_task, dialog_response);
 }
 
+#pragma deprecated Use ShowPlayerAsyncDialogStr instead
 stock AwaitAsyncDialogStr(playerid, dialog_response[e_DIALOG_RESPONSE_INFO], style, ConstStringTag:caption, ConstStringTag:info, ConstStringTag:button1, ConstStringTag:button2)
 {
-	pawn_call_native("ShowPlayerDialog", "dddSSSS", playerid, PAWN_PLUS_DIALOG_ID, style, _:caption, _:info, _:button1, _:button2);
+	#if defined PPDIALOGS_NO_COMPAT_NATIVE_CALL
+		ShowPlayerDialogStr(playerid, PAWN_PLUS_DIALOG_ID, style, caption, info, button1, button2);
+	#else
+		pawn_call_native("ShowPlayerDialog", "dddSSSS", playerid, PAWN_PLUS_DIALOG_ID, style, _:caption, _:info, _:button1, _:button2);
+	#endif
+
 	if(PlayerDialogTasks[playerid])
 	{
 		task_delete(PlayerDialogTasks[playerid]);
@@ -70,6 +83,31 @@ stock AwaitAsyncDialogStr(playerid, dialog_response[e_DIALOG_RESPONSE_INFO], sty
 	task_get_result_arr(dialog_task, dialog_response);
 }
 
+stock Task:ShowPlayerAsyncDialog(playerid, style, const caption[], const info[], const button1[], const button2[])
+{
+	ShowPlayerDialog(playerid, PAWN_PLUS_DIALOG_ID, style, caption, info, button1, button2);
+	if(PlayerDialogTasks[playerid])
+	{
+		task_delete(PlayerDialogTasks[playerid]);
+	}
+	return PlayerDialogTasks[playerid] = task_new();
+}
+
+stock Task:ShowPlayerAsyncDialogStr(playerid, style, ConstStringTag:caption, ConstStringTag:info, ConstStringTag:button1, ConstStringTag:button2)
+{
+	#if defined PPDIALOGS_NO_COMPAT_NATIVE_CALL
+		ShowPlayerDialogStr(playerid, PAWN_PLUS_DIALOG_ID, style, caption, info, button1, button2);
+	#else
+		pawn_call_native("ShowPlayerDialog", "dddSSSS", playerid, PAWN_PLUS_DIALOG_ID, style, _:caption, _:info, _:button1, _:button2);
+	#endif
+
+	if(PlayerDialogTasks[playerid])
+	{
+		task_delete(PlayerDialogTasks[playerid]);
+	}
+	return PlayerDialogTasks[playerid] = task_new();
+}
+
 forward AsyncDialogsHandler(playerid, dialogid, response, listitem, const inputtext[]);
 public AsyncDialogsHandler(playerid, dialogid, response, listitem, const inputtext[])
 {
@@ -78,7 +116,7 @@ public AsyncDialogsHandler(playerid, dialogid, response, listitem, const inputte
 		new dialog_response[e_DIALOG_RESPONSE_INFO];
 		dialog_response[E_DIALOG_RESPONSE_Response] = response;
 		dialog_response[E_DIALOG_RESPONSE_Listitem] = listitem;
-		strcat((dialog_response[E_DIALOG_RESPONSE_InputText][0] = '\0', dialog_response[E_DIALOG_RESPONSE_InputText]), inputtext);
+		strcat(dialog_response[E_DIALOG_RESPONSE_InputText], inputtext, 129);
 
 		new const Task:task = PlayerDialogTasks[playerid];
 		PlayerDialogTasks[playerid] = Task:0;
