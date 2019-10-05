@@ -73,6 +73,6 @@ CMD:asyncdialog(playerid, params[])
 ```
 
 ## Thanks
-* @IllidanS4 for PawnPlus, which allowing this and even more awesome stuff
+* @IllidanS4 for PawnPlus, which allows this and even more awesome stuff
 * @TommyB123 for helping me test it out on a real environment
 
