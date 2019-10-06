@@ -32,7 +32,7 @@ forward _pp@on_init@PPAsyncDialogs();
 public _pp@on_init@PPAsyncDialogs()
 {
 	// I wish I didn't had to do this, but rewriting the public function header is cool!!1
-	wait_ms(1);
+	wait_ticks(1);
 	AsyncDialogResponseHandler = pawn_register_callback("OnDialogResponse", "AsyncDialogsHandler");
 }
 
