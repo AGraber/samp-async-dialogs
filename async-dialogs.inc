@@ -28,32 +28,29 @@ static Task:PlayerDialogTasks[MAX_PLAYERS] = {Task:0, ...};
 
 static CallbackHandler:AsyncDialogResponseHandler;
 
-public OnGameModeInit()
+forward _pp@on_init@PPAsyncDialogs();
+public _pp@on_init@PPAsyncDialogs()
 {
+	// I wish I didn't had to do this, but rewriting the public function header is cool!!1
+	wait_ms(1);
 	AsyncDialogResponseHandler = pawn_register_callback("OnDialogResponse", "AsyncDialogsHandler");
-
-	#if defined AsyncDialogs_OnGameModeInit
-		return AsyncDialogs_OnGameModeInit();
-	#else
-		return 1;
-	#endif
 }
 
-public OnGameModeExit()
+forward _pp@on_exit@PPAsyncDialogs();
+public _pp@on_exit@PPAsyncDialogs()
 {
 	pawn_unregister_callback(AsyncDialogResponseHandler);
-
-	#if defined AsyncDialogs_OnGameModeExit
-		return AsyncDialogs_OnGameModeExit();
-	#else
-		return 1;
-	#endif
 }
 
 #pragma deprecated Use ShowPlayerAsyncDialog instead
 stock AwaitAsyncDialog(playerid, dialog_response[e_DIALOG_RESPONSE_INFO], style, const caption[], const info[], const button1[], const button2[])
 {
-	ShowPlayerDialog(playerid, PAWN_PLUS_DIALOG_ID, style, caption, info, button1, button2);
+	#if defined PPDIALOGS_NO_COMPAT_NATIVE_CALL
+		ShowPlayerDialogStr(playerid, PAWN_PLUS_DIALOG_ID, style, caption, info, button1, button2);
+	#else
+		pawn_call_native("ShowPlayerDialog", "dddssss", playerid, PAWN_PLUS_DIALOG_ID, style, caption, info, button1, button2);
+	#endif
+
 	if(PlayerDialogTasks[playerid])
 	{
 		task_delete(PlayerDialogTasks[playerid]);
@@ -85,7 +82,12 @@ stock AwaitAsyncDialogStr(playerid, dialog_response[e_DIALOG_RESPONSE_INFO], sty
 
 stock Task:ShowPlayerAsyncDialog(playerid, style, const caption[], const info[], const button1[], const button2[])
 {
-	ShowPlayerDialog(playerid, PAWN_PLUS_DIALOG_ID, style, caption, info, button1, button2);
+	#if defined PPDIALOGS_NO_COMPAT_NATIVE_CALL
+		ShowPlayerDialogStr(playerid, PAWN_PLUS_DIALOG_ID, style, caption, info, button1, button2);
+	#else
+		pawn_call_native("ShowPlayerDialog", "dddssss", playerid, PAWN_PLUS_DIALOG_ID, style, caption, info, button1, button2);
+	#endif
+
 	if(PlayerDialogTasks[playerid])
 	{
 		task_delete(PlayerDialogTasks[playerid]);
@@ -126,24 +128,3 @@ public AsyncDialogsHandler(playerid, dialogid, response, listitem, const inputte
 	}
 	return 0;
 }
-
-#if defined _ALS_OnGameModeInit
-    #undef OnGameModeInit
-#else
-    #define _ALS_OnGameModeInit
-#endif
-#define OnGameModeInit AsyncDialogs_OnGameModeInit
-#if defined AsyncDialogs_OnGameModeInit
-    forward AsyncDialogs_OnGameModeInit();
-#endif
-
-#if defined _ALS_OnGameModeExit
-	#undef OnGameModeExit
-#else
-	#define _ALS_OnGameModeExit
-#endif
-
-#define OnGameModeExit AsyncDialogs_OnGameModeExit
-#if defined AsyncDialogs_OnGameModeExit
-	forward AsyncDialogs_OnGameModeExit();
-#endif
