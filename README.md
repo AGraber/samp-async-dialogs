@@ -32,7 +32,7 @@ While you're on it and if you don't use PawnPlus yet,
 
 This include provides one single function
 ```pawn
-AwaitAsyncDialog(playerid, dialog_response[e_DIALOG_RESPONSE_INFO], style, const caption[], const info[], const button1[], const button2[])
+ShowPlayerAsyncDialog(playerid, style, const caption[], const info[], const button1[], const button2[])
 ```
 
 This will show the dialog and await for the response, which will pause the
